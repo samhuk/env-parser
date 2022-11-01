@@ -36,7 +36,7 @@ The unit tests can be debugged with Visual Studio Code by running the **Run Unit
 
 ## Pull Requests
 
-Pull requests automatically run a CI pipeline that checks various criteria:
+Pull requests have the following criteria:
 
 * Linting
 * Typescript build
