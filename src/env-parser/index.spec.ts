@@ -10,6 +10,7 @@ describe('env-parser', () => {
     const isNonNegativeNumber = (v: number) => !Number.isNaN(v) && v > 0
 
     test('basic test', () => {
+      // -- Arrange
       const mockProcessEnv = {
         SERVER_PORT: '4001',
         SERVER_HOST: '10.0.0.1',
@@ -24,6 +25,8 @@ describe('env-parser', () => {
         ADMIN_USER_NAMES: '["root", "admin", "administrator"]',
         ENABLE_DATA_SCRAPE: '1',
       }
+
+      // -- Act
       const env = fn({
         serverPort: { $default: 8080 },
         serverHost: { $default: 'localhost' },
@@ -48,6 +51,7 @@ describe('env-parser', () => {
         enableDataScrape: { $parse: 'bool' },
       }, mockProcessEnv)
 
+      // -- Assert
       expect(env).toEqual({
         value: {
           serverPort: 4001,
