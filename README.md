@@ -17,6 +17,14 @@
 
 env-parser is a powerful, fully type-enforced Node environment variable parser. It supports arbitrary parsing, validation, and fully recursive property nesting.
 
+## Why use?
+
+env-parser includes a set of features that no other Node environement variable parser package has:
+
+* Type inference of your environment according to your description of it
+* Recursive property nesting
+* Robust validation error and exception handling
+
 ## Usage Overview
 
 Parse environment variables, from `process.env` by default or manually provided:
