@@ -19,8 +19,10 @@ env-parser is a powerful, fully type-enforced Node environment variable parser. 
 
 ## Usage Overview
 
+Parse environment variables, from `process.env` by default or manually provided:
+
 ```typescript
-import { parseEnv } from '@samhuk/env-parser'
+import parseEnv from '@samhuk/env-parser'
 
 const mockProcessEnv = {
   SERVER_PORT: '4001',
@@ -33,7 +35,7 @@ const mockProcessEnv = {
   ADMIN_USER_NAMES: '["root", "admin", "administrator"]',
   ENABLE_DATA_SCRAPE: '1',
 }
-const envResult = fn({
+const envResult = parseEnv({
   serverPort: { $default: 8080 },
   serverHost: { $default: 'localhost' },
   isProd: { $name: 'NODE_ENV', $default: false, $parse: v => v === 'production' },
@@ -65,10 +67,10 @@ console.log(envResult.value)
   adminUserNames: ['root', 'admin', 'administrator'],
   enableDataScrape: true,
 }) */
-
+console.log(envResult.hasErrors) // false
+console.log(envResukt.errors) // []
 ```
-
-Your environment is fully typed according to your description of it:
+The parsed environment is fully typed according to your description of it:
 ```
 type Env = typeof envResult['val']
 /* type Env = {
@@ -88,7 +90,7 @@ type Env = typeof envResult['val']
 
 ## Development
 
-Contributions welcome. See [./contributing/development.md](./contributing/development.md)
+Contributions welcome. See [./contributing/development.md](./contributing/development.md).
 
 ---
 
