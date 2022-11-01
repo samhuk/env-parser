@@ -1,7 +1,7 @@
 {
-  "name": "{{npm-package-name}}",
+  "name": "@samhuk/env-parser",
   "version": "0.0.1",
-  "description": "{{package-slogan}}",
+  "description": "Powerful Typescript environment variable parser",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -43,7 +43,7 @@
 
     "check": "npm rum lint-errors-only && npm run build-ts && npm run tests && echo Done!"
   },
-  "repository": "https://github.com/{{github-user-name}}/{{package-name}}",
+  "repository": "https://github.com/samhuk/env-parser",
   "author": "",
   "license": "MIT",
   "publishConfig": {
