@@ -15,15 +15,15 @@
 
 ## Overview
 
-env-parser is a powerful, fully type-enforced Node environment variable parser. It supports arbitrary parsing, validation, and fully recursive property nesting.
+env-parser is a powerful, fully type-enforced Node environment variable parser. It supports environment type inference, arbitrary parsing and validation, and recursive property nesting.
 
 ## Why use?
 
-env-parser includes a set of features that no other Node environement variable parser package has:
+env-parser combines a set of features that together no other environment variable parser package has:
 
-* Type inference of your environment according to your description of it
-* Recursive property nesting
-* Robust validation error and exception handling
+* Delightful type inference of your environment according to your description of it.
+* Recursive property nesting.
+* Robust validation and error handling functionality.
 
 ## Usage Overview
 
@@ -79,7 +79,7 @@ console.log(envResult.hasErrors) // false
 console.log(envResukt.errors) // []
 ```
 The parsed environment is fully typed according to your description of it:
-```
+```typescript
 type Env = typeof envResult['val']
 /* type Env = {
     serverPort: number;
