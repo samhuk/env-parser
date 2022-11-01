@@ -1,4 +1,4 @@
-import { EnvOption, EnvOptionParse, EnvOptions, EnvVarType, EnvVarTypeUnion, ParsedEnv } from './types'
+import { EnvOption, EnvOptionParse, EnvOptions, EnvVarType, EnvVarTypeUnion, ErrorType, ParsedEnv, ParseEnvError, ParseEnvResult } from './types'
 
 /**
  * @example
@@ -82,18 +82,75 @@ const parseValue = (rawValue: any, envOption: EnvOption) => {
   return rawValue
 }
 
-const _parseEnv = (envOptions: EnvOptions, defaultEnvVarName: string, processEnvVars: { [envVarName: string]: string }): ParsedEnv => {
+const _parseEnv = (
+  envOptions: EnvOptions,
+  defaultEnvVarName: string,
+  processEnvVars: { [envVarName: string]: string },
+  errors: ParseEnvError[],
+): ParsedEnv => {
   const keys = Object.keys(envOptions)
   // If leaf node, parse leaf node
-  if (isEnvOptionsLeafNode(envOptions, keys))
-    return parseValue(processEnvVars[envOptions.$name ?? defaultEnvVarName], envOptions)
+  if (isEnvOptionsLeafNode(envOptions, keys)) {
+    const envVarName = envOptions.$name ?? defaultEnvVarName
+    const rawValue = processEnvVars[envVarName]
+    let value: any
+
+    if (rawValue == null) {
+      if (envOptions.$default === undefined) {
+        errors.push({
+          type: ErrorType.MISSING_VALUE,
+          envVarName,
+        })
+        return null
+      }
+
+      value = envOptions.$default
+    }
+
+    try {
+      value = parseValue(rawValue, envOptions)
+    }
+    catch (error: any) {
+      errors.push({
+        type: ErrorType.PARSE_VALUE_EXCEPTION,
+        envVarName,
+        rawValue,
+        error,
+      })
+      return null
+    }
+
+    if (envOptions.$validate != null) {
+      try {
+        if (!envOptions.$validate(value)) {
+          errors.push({
+            type: ErrorType.VALIDATE_VALUE_FAIL,
+            envVarName,
+            rawValue,
+          })
+          return null
+        }
+      }
+      catch (error: any) {
+        errors.push({
+          type: ErrorType.VALIDATE_VALUE_EXCEPTION,
+          envVarName,
+          rawValue,
+          error,
+        })
+        return null
+      }
+    }
+
+    return value
+  }
 
   // If not leaf node, parse child nodes
-  const parsedChildNodes: { [k in string]: EnvOptions } = {}
+  const parsedChildNodes: { [k in string]: ParsedEnv } = {}
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i]
     const childDefaultEnvVarName = (defaultEnvVarName != null ? `${defaultEnvVarName}_` : '').concat(camelCaseToUpperCaseSnakeCase(key))
-    parsedChildNodes[key] = _parseEnv(envOptions[key], childDefaultEnvVarName, processEnvVars) as any
+    parsedChildNodes[key] = _parseEnv(envOptions[key], childDefaultEnvVarName, processEnvVars, errors)
   }
   return parsedChildNodes as any
 }
@@ -101,6 +158,13 @@ const _parseEnv = (envOptions: EnvOptions, defaultEnvVarName: string, processEnv
 export const parseEnv = <T extends EnvOptions>(
   envOptions: T,
   processEnvVars?: { [envVarName: string]: string },
-): ParsedEnv<T> => (
-  _parseEnv(envOptions, null, processEnvVars ?? process.env) as ParsedEnv<T>
-  )
+): ParseEnvResult<T> => {
+  const errors: ParseEnvError[] = []
+  const value = _parseEnv(envOptions, null, processEnvVars ?? process.env, errors) as ParsedEnv<T>
+
+  return {
+    value,
+    errors,
+    hasErrors: errors.length > 0,
+  }
+}

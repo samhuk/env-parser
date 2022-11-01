@@ -15,7 +15,7 @@
 
 ## Overview
 
-env-parser is a powerful, fully type-enforced Node environment variable parser. It supports arbitrary parsing, validation, and property nesting (recursively).
+env-parser is a powerful, fully type-enforced Node environment variable parser. It supports arbitrary parsing, validation, and fully recursive property nesting.
 
 ## Usage Overview
 
@@ -26,40 +26,52 @@ const mockProcessEnv = {
   SERVER_PORT: '4001',
   SERVER_HOST: '10.0.0.1',
   NODE_ENV: 'production',
-  DB_HOST: '11.0.0.1',
-  DB_PORT: '7534',
+  DB_HOST: 'localhost',
+  DB_PORT: '5432',
   DB_NAME: 'test-db',
   DB_OTHER_OPTIONS_TIMEOUT_SECONDS: '1000',
+  ADMIN_USER_NAMES: '["root", "admin", "administrator"]',
+  ENABLE_DATA_SCRAPE: '1',
 }
-
-const env = fn({
-  serverPort: { $default: 8080, },
+const envResult = fn({
+  serverPort: { $default: 8080 },
   serverHost: { $default: 'localhost' },
-  isProd: {
-    $name: 'NODE_ENV',
-    $default: false,
-    $parse: v => v === 'production',
-  },
+  isProd: { $name: 'NODE_ENV', $default: false, $parse: v => v === 'production' },
   db: {
     host: { $default: 'localhost' },
-    port: {
-      $default: 5432,
-      $parse: parseInt,
-      $validate: v => !Number.isNaN(v) && v > 3000 && v < 60000,
-    },
+    port: { $default: 5432, $validate: isNumberBetween(80, 60000) },
     name: { $default: 'db' },
     otherOptions: {
-      timeoutSeconds: {
-        $default: 1000,
-        $validate: v => !Number.isNaN(v) && v > 0,
-      },
+      timeoutSeconds: { $default: 1000, $validate: isNonNegativeNumber },
     },
   },
+  adminUserNames: { $parse: 'arr' },
+  enableDataScrape: { $parse: 'bool' },
 }, mockProcessEnv)
 
-type Env = typeof env
-/*
-type Env = {
+console.log(envResult.value)
+/* {
+  serverPort: 4001,
+  serverHost: '10.0.0.1',
+  isProd: true,
+  db: {
+    host: 'localhost',
+    port: 5432,
+    name: 'test-db',
+    otherOptions: {
+      timeoutSeconds: 1000,
+    },
+  },
+  adminUserNames: ['root', 'admin', 'administrator'],
+  enableDataScrape: true,
+}) */
+
+```
+
+Your environment is fully typed according to your description of it:
+```
+type Env = typeof envResult['val']
+/* type Env = {
     serverPort: number;
     serverHost: string;
     isProd: boolean;
@@ -71,8 +83,7 @@ type Env = {
             timeoutSeconds: number;
         };
     };
-}
-*/
+} */
 ```
 
 ## Development
@@ -82,3 +93,5 @@ Contributions welcome. See [./contributing/development.md](./contributing/develo
 ---
 
 If you found this package delightful, feel free to [buy me a coffee](https://www.buymeacoffee.com/samhuk) ✨
+
+*Package generated from [ts-npm-package-template](https://github.com/samhuk/ts-npm-package-template)*
