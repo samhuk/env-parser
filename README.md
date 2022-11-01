@@ -87,7 +87,7 @@ console.log(envResukt.errors) // []
 ```
 The parsed environment is fully typed according to your description of it:
 ```typescript
-type Env = typeof envResult['val']
+type Env = typeof envResult['value']
 /* type Env = {
     serverPort: number;
     serverHost: string;
