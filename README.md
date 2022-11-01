@@ -32,7 +32,13 @@ Parse environment variables, from `process.env` by default or manually provided:
 ```typescript
 import parseEnv from '@samhuk/env-parser'
 
-const mockProcessEnv = {
+// -- Define any common validators
+const isNumberBetween = (l: number, u: number) => (
+  (v: number) => !Number.isNaN(v) && v > l && v < u
+)
+const isNonNegativeNumber = (v: number) => !Number.isNaN(v) && v > 0
+// -- Mock process env (process.env is used by default)
+const processEnv = {
   SERVER_PORT: '4001',
   SERVER_HOST: '10.0.0.1',
   NODE_ENV: 'production',
@@ -43,6 +49,7 @@ const mockProcessEnv = {
   ADMIN_USER_NAMES: '["root", "admin", "administrator"]',
   ENABLE_DATA_SCRAPE: '1',
 }
+// -- Parse env
 const envResult = parseEnv({
   serverPort: { $default: 8080 },
   serverHost: { $default: 'localhost' },
@@ -57,8 +64,8 @@ const envResult = parseEnv({
   },
   adminUserNames: { $parse: 'arr' },
   enableDataScrape: { $parse: 'bool' },
-}, mockProcessEnv)
-
+}, processEnv)
+// -- Observe parse result!
 console.log(envResult.value)
 /* {
   serverPort: 4001,
